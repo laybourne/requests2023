@@ -1,0 +1,71 @@
+#第一题答案
+import requests
+import json
+import threading
+
+url = 'https://jsonplaceholder.typicode.com/posts/100/comments'
+
+# 创建多线程类
+class CrawlerThread(threading.Thread):
+    def __init__(self, url, file):
+        threading.Thread.__init__(self)
+        self.url = url
+        self.file = file
+
+    def run(self):
+        response = requests.get(self.url)
+        data = json.loads(response.text)
+        for comment in data:
+            email = comment['email']
+            self.file.write(email + '\n')
+#爬取500次，并将数据写入文本
+threads = []
+with open('emails.txt', 'w') as f:
+    for i in range(500):
+        thread = CrawlerThread(url, f)
+        thread.start()
+        threads.append(thread)
+    for thread in threads:
+        thread.join()
+
+
+
+#第二题答案
+import addressbook_pb2
+
+# 创建新的 AddressBook 对象
+address_book = addressbook_pb2.AddressBook()
+
+# 创建新的 Person 对象
+person = address_book.people.add()
+person.id = 123456
+person.name = "admin"
+person.email = "admin@example.com"
+
+# 创建新的 PhoneNumber 对象
+phone_number = person.phones.add()
+phone_number.number = "028-7654324"
+phone_number.type = addressbook_pb2.Person.HOME
+
+# 序列化 AddressBook 对象
+data = address_book.SerializeToString()
+
+# 将数据写入二进制文件
+with open('addressbook.bin', 'wb') as f:
+    f.write(data)
+
+with open('addressbook.bin', 'rb') as f:
+    data = f.read()
+
+# 反序列化 AddressBook 对象
+address_book = addressbook_pb2.AddressBook()
+address_book.ParseFromString(data)
+
+# 打印 Person 对象的信息
+for person in address_book.people:
+    print("ID:", person.id)
+    print("Name:", person.name)
+    print("Email:", person.email)
+    for phone_number in person.phones:
+        print("Phone Number:", phone_number.number)
+        print("Phone Type:", phone_number.type)
